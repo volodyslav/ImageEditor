@@ -57,6 +57,12 @@ class ImageEditor(QWidget):
             "}"
         )
 
+        # Save button
+        self.save_btn  = QPushButton("Save")
+        self.save_btn.setEnabled(False)
+        self.save_btn.clicked.connect(self.save_image)
+
+
         # Change to gray button
         self.gray_change = QPushButton("Gray")
         self.gray_change.clicked.connect(self.change_to_gray)
@@ -69,6 +75,21 @@ class ImageEditor(QWidget):
         # Image is not opened
         self.blur_change.setEnabled(False)
 
+        # Resolution increase button
+        self.resolution_btn = QPushButton("Quality")
+        self.resolution_btn.clicked.connect(self.higher_resolution)
+        self.resolution_btn.setEnabled(False)
+
+        # Flip horizontally
+        self.flip_h = QPushButton("FlipH")
+        self.flip_h.clicked.connect(self.flip_horizontal)
+        self.flip_h.setEnabled(False)
+
+        # Flip vertically
+        self.flip_v = QPushButton("FlipV")
+        self.flip_v.clicked.connect(self.flip_vertical)
+        self.flip_v.setEnabled(False)
+
         # Buttons for back and next images in images list
         self.previous_image = QPushButton("Previous")
         self.previous_image.clicked.connect(self.show_previous_image)
@@ -79,8 +100,12 @@ class ImageEditor(QWidget):
 
         # Put widgets into btn layout
         self.btn_main_layout.addWidget(self.open_btn, alignment=Qt.AlignTop)
+        self.btn_main_layout.addWidget(self.save_btn)
         self.btn_main_layout.addWidget(self.gray_change)
         self.btn_main_layout.addWidget(self.blur_change)
+        self.btn_main_layout.addWidget(self.resolution_btn)
+        self.btn_main_layout.addWidget(self.flip_h)
+        self.btn_main_layout.addWidget(self.flip_v)
         self.btn_main_layout.addWidget(self.previous_image)
         self.btn_main_layout.addWidget(self.next_image)
         self.btn_main_layout.setAlignment(Qt.AlignLeft)
@@ -116,9 +141,26 @@ class ImageEditor(QWidget):
                 # When image is selected, you can change it
                 self.gray_change.setEnabled(True)
                 self.blur_change.setEnabled(True)
+                self.save_btn.setEnabled(True)
+                self.resolution_btn.setEnabled(True)
+                self.flip_h.setEnabled(True)
+                self.flip_v.setEnabled(True)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open a file: {str(e)}")
+
+    def save_image(self):
+        """Save the image"""
+        try:
+            pixmap = QPixmap(self.images[self.current_image_index])
+            if not pixmap.isNull():
+                filename, _ = QFileDialog.getSaveFileName(self, "Open Image", f"my_image{self.file_extension}", "Image Files (*.png *.jpg *.jpeg *.bmp *.gif)")
+                if filename:
+                    pixmap.save(filename)
+                    QMessageBox.information(self, "Success", "Image was saved successfully")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open a file: {str(e)}")
+
 
     def load_image(self, new_filename):
         """Load an edited image on the screen"""
@@ -145,6 +187,7 @@ class ImageEditor(QWidget):
 
         print("Index", self.current_image_index)
 
+
     def show_previous_image(self):
         """-1 means show -2, -3 in the list"""
         self.current_image_index -= 1
@@ -156,24 +199,47 @@ class ImageEditor(QWidget):
         self.current_image_index += 1
         self.load_image(self.images[self.current_image_index])
 
+    def higher_resolution(self):
+        """Increase the image resolution(quality)"""
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            width, height = image.size
+            if width < 2000 and height < 2000:
+                new_width = width * 2
+                new_height = height * 2
+                print(new_width, new_height)
+                new_image = image.resize((new_width, new_height), Image.LANCZOS)
+                # New name
+                new_filename = f"images/resol{self.file_extension}"
+                new_image.save(new_filename)
+                # Add into images list for return back
+                self.images.append(new_filename)
+                # Show image
+                self.load_image(new_filename)
+                self.resolution_btn.setEnabled(True)
+            else:
+                self.resolution_btn.setEnabled(False)
+                QMessageBox.warning(self, "Warning", "The resolution is already high!")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
     def change_to_gray(self):
         """Change image into gray color"""
         try:
             # Change into an image pillow
-            image = Image.open(self.images[-1])
+            image = Image.open(self.images[self.current_image_index])
             # Change the image
             gray_image = image.convert("L")
-            # Save the image
-            gray_image.save(f"images/gray{self.file_extension}")
             # New name
             new_filename = f"images/gray{self.file_extension}"
+            # Save the image
+            gray_image.save(new_filename)
             # Add into images list for return back
             self.images.append(new_filename)
             # Show image
             self.load_image(new_filename)
             # Disable the button
-            self.gray_change.setEnabled(False)
+            #self.gray_change.setEnabled(False)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
@@ -181,7 +247,7 @@ class ImageEditor(QWidget):
         """Blur image"""
         try:
             # Change into an image pillow
-            image = Image.open(self.images[-1])
+            image = Image.open(self.images[self.current_image_index])
             # Change the image
             gray_image = image.filter(ImageFilter.BLUR)
             # New name
@@ -195,6 +261,42 @@ class ImageEditor(QWidget):
             # disable the button
             self.blur_change.setEnabled(False)
 
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def flip_horizontal(self):
+        try:
+            # Open last image
+            image = Image.open(self.images[self.current_image_index])
+            flip_image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            # New name
+            new_filename = f"images/fliph{self.file_extension}"
+            # Save the image
+            flip_image.save(new_filename)
+            # Add into images list for return back
+            self.images.append(new_filename)
+            # Show image
+            self.load_image(new_filename)
+            # disable the button
+            #self.flip_h.setEnabled(False)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def flip_vertical(self):
+        try:
+            # Open last image
+            image = Image.open(self.images[self.current_image_index])
+            flip_image = image.transpose(Image.FLIP_TOP_BOTTOM)
+            # New name
+            new_filename = f"images/flipv{self.file_extension}"
+            # Save the image
+            flip_image.save(new_filename)
+            # Add into images list for return back
+            self.images.append(new_filename)
+            # Show image
+            self.load_image(new_filename)
+            # disable the button
+            # self.flip_h.setEnabled(False)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
