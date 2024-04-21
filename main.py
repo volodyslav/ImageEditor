@@ -184,8 +184,15 @@ class ImageEditor(QWidget):
             self.previous_image.setEnabled(True)
         else:
             self.previous_image.setEnabled(False)
-
+        # save memory
+        self.clear_images()
         print("Index", self.current_image_index)
+
+    def clear_images(self):
+        """Clear self.images in order to save memory, if the length more or equal to 20 (!!!!!!!!!Find better solution)"""
+        if len(self.images) >= 20:
+            print("Clear memory")
+            self.images.pop(0)
 
 
     def show_previous_image(self):
