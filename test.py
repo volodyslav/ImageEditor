@@ -1,6 +1,6 @@
 import unittest
 from main import ImageEditor
-from PyQt5.QtWidgets import QApplication, QListWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QListWidget, QPushButton, QFileDialog
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 import sys

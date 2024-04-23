@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox, QFileDialog,  QVBoxLayout, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit,  QVBoxLayout, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
@@ -31,6 +31,8 @@ class ImageEditor(QWidget):
         self.main_layout = QVBoxLayout()
         # Save, open etc buttons
         self.btn_main_layout = QHBoxLayout()
+        # Sliders
+        self.sliders_layout = QHBoxLayout()
         # Image layout
         self.image_layout = QHBoxLayout()
 
@@ -91,6 +93,23 @@ class ImageEditor(QWidget):
         self.flip_v.clicked.connect(self.flip_vertical)
         self.flip_v.setEnabled(False)
 
+        # Resize an image button
+        self.resize_button = QPushButton("Resize")
+        self.resize_button.clicked.connect(self.resize_image)
+        self.resize_button.setEnabled(False)
+
+        # Change weight and height text
+        self.weight_size_label = QLabel("Weight")
+        self.weight_size_label.setVisible(False)
+        self.weight_size = QLineEdit()
+        self.weight_size.setVisible(False)
+        self.height_size_label = QLabel("Height")
+        self.height_size_label.setVisible(False)
+        self.height_size = QLineEdit()
+        self.height_size.setVisible(False)
+        self.resize_btn_in_function = QPushButton("Resize")
+        self.resize_btn_in_function.setVisible(False)
+
         # Buttons for back and next images in images list
         self.previous_image = QPushButton("Previous")
         self.previous_image.clicked.connect(self.show_previous_image)
@@ -107,10 +126,16 @@ class ImageEditor(QWidget):
         self.btn_main_layout.addWidget(self.resolution_btn)
         self.btn_main_layout.addWidget(self.flip_h)
         self.btn_main_layout.addWidget(self.flip_v)
+        self.btn_main_layout.addWidget(self.resize_button)
         self.btn_main_layout.addWidget(self.previous_image)
         self.btn_main_layout.addWidget(self.next_image)
         self.btn_main_layout.setAlignment(Qt.AlignLeft)
 
+        self.sliders_layout.addWidget(self.weight_size_label)
+        self.sliders_layout.addWidget(self.weight_size)
+        self.sliders_layout.addWidget(self.height_size_label)
+        self.sliders_layout.addWidget(self.height_size)
+        self.sliders_layout.addWidget(self.resize_btn_in_function)
         # Image show
         self.image_field = QLabel()
 
@@ -119,7 +144,8 @@ class ImageEditor(QWidget):
 
         # Show all layout
         self.main_layout.addLayout(self.btn_main_layout, 20)
-        self.main_layout.addLayout(self.image_layout, 80)
+        self.main_layout.addLayout(self.sliders_layout, 10)
+        self.main_layout.addLayout(self.image_layout, 70)
         self.setLayout(self.main_layout)
 
     def open_image(self):
@@ -146,6 +172,7 @@ class ImageEditor(QWidget):
                 self.resolution_btn.setEnabled(True)
                 self.flip_h.setEnabled(True)
                 self.flip_v.setEnabled(True)
+                self.resize_button.setEnabled(True)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open a file: {str(e)}")
@@ -188,6 +215,39 @@ class ImageEditor(QWidget):
         # save memory
         self.clear_images()
         print("Index", self.current_image_index)
+
+    def resize_image(self):
+        try:
+            self.image_resized = Image.open(self.images[self.current_image_index])
+            # Clicked resize main btn
+            self.weight_size_label.setVisible(True)
+            self.weight_size.setVisible(True)
+            self.height_size_label.setVisible(True)
+            self.height_size.setVisible(True)
+            self.resize_btn_in_function.setVisible(True)
+
+            self.weight_size.setText(str(self.image_resized.width))
+            self.height_size.setText(str(self.image_resized.height))
+            self.resize_btn_in_function.clicked.connect(self.save_resized_image)
+
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def save_resized_image(self):
+        """Mini resize button's function"""
+        new_width = int(self.weight_size.text())
+        new_height = int(self.height_size.text())
+
+        # Resize the image
+        new_image = self.image_resized.resize((new_width, new_height))
+        # New name
+        new_filename = f"images/resize{self.file_extension}"
+        new_image.save(new_filename)
+        # Add into images list for return back
+        self.images.append(new_filename)
+        # Show image
+        self.load_image(new_filename)
 
     def clear_images(self):
         """Clear self.images in order to save memory, if the length more or equal to 20 (!!!!!!!!!Find better solution)"""
