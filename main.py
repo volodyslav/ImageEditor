@@ -39,6 +39,7 @@ class ImageEditor(QWidget):
         self.open_btn = QPushButton("Open image")
         # connect open btn to opem_image fucntion
         self.open_btn.clicked.connect(self.open_image)
+        self.open_btn.setObjectName("open_button")
         self.open_btn.setStyleSheet(
             "QPushButton {"
             "   background-color: #007bff;" 
@@ -61,7 +62,7 @@ class ImageEditor(QWidget):
         self.save_btn  = QPushButton("Save")
         self.save_btn.setEnabled(False)
         self.save_btn.clicked.connect(self.save_image)
-
+        self.save_btn.setObjectName("save_button")
 
         # Change to gray button
         self.gray_change = QPushButton("Gray")
