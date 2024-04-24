@@ -109,6 +109,10 @@ class ImageEditor(QWidget):
         self.height_size.setVisible(False)
         self.resize_btn_in_function = QPushButton("Resize")
         self.resize_btn_in_function.setVisible(False)
+        # When done clicked make other buttons enabled
+        self.resize_done_btn = QPushButton("Done")
+        self.resize_done_btn.setVisible(False)
+        self.resize_done_btn.clicked.connect(self.resize_done)
 
         # Buttons for back and next images in images list
         self.previous_image = QPushButton("Previous")
@@ -136,6 +140,7 @@ class ImageEditor(QWidget):
         self.sliders_layout.addWidget(self.height_size_label)
         self.sliders_layout.addWidget(self.height_size)
         self.sliders_layout.addWidget(self.resize_btn_in_function)
+        self.sliders_layout.addWidget(self.resize_done_btn)
         # Image show
         self.image_field = QLabel()
 
@@ -147,6 +152,46 @@ class ImageEditor(QWidget):
         self.main_layout.addLayout(self.sliders_layout, 10)
         self.main_layout.addLayout(self.image_layout, 70)
         self.setLayout(self.main_layout)
+
+    def make_all_btns_true(self):
+        # Makes all buttons editable true
+        self.gray_change.setEnabled(True)
+        self.blur_change.setEnabled(True)
+        self.save_btn.setEnabled(True)
+        self.resolution_btn.setEnabled(True)
+        self.flip_h.setEnabled(True)
+        self.flip_v.setEnabled(True)
+        self.resize_button.setEnabled(True)
+
+    def make_all_btns_false(self):
+        # Makes all buttons editable false
+        self.gray_change.setEnabled(False)
+        self.blur_change.setEnabled(False)
+        self.save_btn.setEnabled(False)
+        self.resolution_btn.setEnabled(False)
+        self.flip_h.setEnabled(False)
+        self.flip_v.setEnabled(False)
+        self.resize_button.setEnabled(False)
+
+    def make_resize_label_btn_visible(self):
+        """Show the resize buttons and labels"""
+        self.weight_size_label.setVisible(True)
+        self.weight_size.setVisible(True)
+        self.height_size_label.setVisible(True)
+        self.height_size.setVisible(True)
+        self.resize_btn_in_function.setVisible(True)
+        self.resize_done_btn.setVisible(True)
+
+    def make_resize_label_btn_not_visible(self):
+        """Hide the resize buttons and labels"""
+        self.weight_size_label.setVisible(False)
+        self.weight_size.setVisible(False)
+        self.height_size_label.setVisible(False)
+        self.height_size.setVisible(False)
+        self.resize_btn_in_function.setVisible(False)
+        self.resize_done_btn.setVisible(False)
+
+
 
     def open_image(self):
         """For opening images"""
@@ -166,13 +211,7 @@ class ImageEditor(QWidget):
                 # Show image
                 self.load_image(new_filename)
                 # When image is selected, you can change it
-                self.gray_change.setEnabled(True)
-                self.blur_change.setEnabled(True)
-                self.save_btn.setEnabled(True)
-                self.resolution_btn.setEnabled(True)
-                self.flip_h.setEnabled(True)
-                self.flip_v.setEnabled(True)
-                self.resize_button.setEnabled(True)
+                self.make_all_btns_true()
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open a file: {str(e)}")
@@ -220,11 +259,9 @@ class ImageEditor(QWidget):
         try:
             self.image_resized = Image.open(self.images[self.current_image_index])
             # Clicked resize main btn
-            self.weight_size_label.setVisible(True)
-            self.weight_size.setVisible(True)
-            self.height_size_label.setVisible(True)
-            self.height_size.setVisible(True)
-            self.resize_btn_in_function.setVisible(True)
+            self.make_resize_label_btn_visible()
+            # Make main buttons disabled
+            self.make_all_btns_false()
 
             self.weight_size.setText(str(self.image_resized.width))
             self.height_size.setText(str(self.image_resized.height))
@@ -233,6 +270,12 @@ class ImageEditor(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def resize_done(self):
+        # When you're done resize the image click done and hide the labels and btn and show main buttons
+        self.make_all_btns_true()
+        self.make_resize_label_btn_not_visible()
+
 
     def save_resized_image(self):
         """Mini resize button's function"""
@@ -246,6 +289,8 @@ class ImageEditor(QWidget):
         new_image.save(new_filename)
         # Add into images list for return back
         self.images.append(new_filename)
+        # Set current index = -1, the last editing
+        self.current_image_index = -1
         # Show image
         self.load_image(new_filename)
 
@@ -282,6 +327,8 @@ class ImageEditor(QWidget):
                 new_image.save(new_filename)
                 # Add into images list for return back
                 self.images.append(new_filename)
+                # Set current index = -1, the last editing
+                self.current_image_index = -1
                 # Show image
                 self.load_image(new_filename)
                 self.resolution_btn.setEnabled(True)
@@ -304,6 +351,8 @@ class ImageEditor(QWidget):
             gray_image.save(new_filename)
             # Add into images list for return back
             self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
             # Show image
             self.load_image(new_filename)
             # Disable the button
@@ -324,6 +373,8 @@ class ImageEditor(QWidget):
             gray_image.save(new_filename)
             # Add into images list for return back
             self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
             # Show image
             self.load_image(new_filename)
             # disable the button
@@ -343,6 +394,8 @@ class ImageEditor(QWidget):
             flip_image.save(new_filename)
             # Add into images list for return back
             self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
             # Show image
             self.load_image(new_filename)
             # disable the button
@@ -361,6 +414,8 @@ class ImageEditor(QWidget):
             flip_image.save(new_filename)
             # Add into images list for return back
             self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
             # Show image
             self.load_image(new_filename)
             # disable the button
