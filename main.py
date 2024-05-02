@@ -1,8 +1,9 @@
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit,  QVBoxLayout, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit,  QVBoxLayout, QSlider, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import os
+import time
 
 
 class ImageEditor(QWidget):
@@ -98,6 +99,11 @@ class ImageEditor(QWidget):
         self.resize_button.clicked.connect(self.resize_image)
         self.resize_button.setEnabled(False)
 
+        # Crop image button
+        self.crop_button = QPushButton("Crop")
+        self.crop_button.clicked.connect(self.crop_image)
+        self.crop_button.setEnabled(False)
+
         # Change weight and height text
         self.weight_size_label = QLabel("Weight")
         self.weight_size_label.setVisible(False)
@@ -113,6 +119,32 @@ class ImageEditor(QWidget):
         self.resize_done_btn = QPushButton("Done")
         self.resize_done_btn.setVisible(False)
         self.resize_done_btn.clicked.connect(self.resize_done)
+
+        # Change box left upper right bottom, it's hidden
+        # left slider
+        self.left_slider = QSlider(Qt.Horizontal)
+        self.left_slider.setValue(0)
+        self.left_slider.setRange(0, 2000)
+        self.left_slider.setVisible(False)
+        # right slider
+        self.right_slider = QSlider(Qt.Horizontal)
+        self.right_slider.setValue(0)
+        self.right_slider.setRange(0, 2000)
+        self.right_slider.setVisible(False)
+        # top slider
+        self.top_slider = QSlider(Qt.Horizontal)
+        self.top_slider.setValue(0)
+        self.top_slider.setRange(0, 2000)
+        self.top_slider.setVisible(False)
+        # bottom slider
+        self.bottom_slider = QSlider(Qt.Horizontal)
+        self.bottom_slider.setValue(0)
+        self.bottom_slider.setRange(0, 2000)
+        self.bottom_slider.setVisible(False)
+        # Crop done button
+        self.crop_done_btn = QPushButton("Done")
+        self.crop_done_btn.setVisible(False)
+        self.crop_done_btn.clicked.connect(self.crop_done)
 
         # Buttons for back and next images in images list
         self.previous_image = QPushButton("Previous")
@@ -131,16 +163,25 @@ class ImageEditor(QWidget):
         self.btn_main_layout.addWidget(self.flip_h)
         self.btn_main_layout.addWidget(self.flip_v)
         self.btn_main_layout.addWidget(self.resize_button)
+        self.btn_main_layout.addWidget(self.crop_button)
         self.btn_main_layout.addWidget(self.previous_image)
         self.btn_main_layout.addWidget(self.next_image)
         self.btn_main_layout.setAlignment(Qt.AlignLeft)
 
+        # for resize button
         self.sliders_layout.addWidget(self.weight_size_label)
         self.sliders_layout.addWidget(self.weight_size)
         self.sliders_layout.addWidget(self.height_size_label)
         self.sliders_layout.addWidget(self.height_size)
         self.sliders_layout.addWidget(self.resize_btn_in_function)
         self.sliders_layout.addWidget(self.resize_done_btn)
+        # for crop button
+        self.sliders_layout.addWidget(self.left_slider)
+        self.sliders_layout.addWidget(self.right_slider)
+        self.sliders_layout.addWidget(self.top_slider)
+        self.sliders_layout.addWidget(self.bottom_slider)
+        self.sliders_layout.addWidget(self.crop_done_btn)
+
         # Image show
         self.image_field = QLabel()
 
@@ -162,6 +203,7 @@ class ImageEditor(QWidget):
         self.flip_h.setEnabled(True)
         self.flip_v.setEnabled(True)
         self.resize_button.setEnabled(True)
+        self.crop_button.setEnabled(True)
 
     def make_all_btns_false(self):
         # Makes all buttons editable false
@@ -172,6 +214,21 @@ class ImageEditor(QWidget):
         self.flip_h.setEnabled(False)
         self.flip_v.setEnabled(False)
         self.resize_button.setEnabled(False)
+        self.crop_button.setEnabled(False)
+
+    def make_crop_inner_btns_visible(self):
+        self.left_slider.setVisible(True)
+        self.right_slider.setVisible(True)
+        self.top_slider.setVisible(True)
+        self.bottom_slider.setVisible(True)
+        self.crop_done_btn.setVisible(True)
+
+    def make_crop_inner_btns_hidden(self):
+        self.left_slider.setVisible(False)
+        self.right_slider.setVisible(False)
+        self.top_slider.setVisible(False)
+        self.bottom_slider.setVisible(False)
+        self.crop_done_btn.setVisible(False)
 
     def make_resize_label_btn_visible(self):
         """Show the resize buttons and labels"""
@@ -200,6 +257,8 @@ class ImageEditor(QWidget):
             if filename.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif")):
                 # Save file like image
                 image = Image.open(filename)
+                # create folder images for saving them there
+                #os.mkdir("images")
                 # Find extensions, save extension for the image for all changes
                 self.file_extension = os.path.splitext(filename)[1]
                 # New name
@@ -255,6 +314,23 @@ class ImageEditor(QWidget):
         self.clear_images()
         print("Index", self.current_image_index)
 
+
+    def crop_done(self):
+        # When you crop the image return prev states
+        self.make_crop_inner_btns_hidden()
+        self.make_all_btns_true()
+
+    def crop_image(self):
+        try:
+            self.image_cropped = Image.open(self.images[self.current_image_index])
+            # Click make others button disabled
+            self.make_crop_inner_btns_visible()
+            self.make_all_btns_false()
+
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
     def resize_image(self):
         try:
             self.image_resized = Image.open(self.images[self.current_image_index])
@@ -288,7 +364,8 @@ class ImageEditor(QWidget):
         new_filename = f"images/resize{self.file_extension}"
         new_image.save(new_filename)
         # Add into images list for return back
-        self.images.append(new_filename)
+        # Add during changes only one element resize
+        self.images[-1] = new_filename
         # Set current index = -1, the last editing
         self.current_image_index = -1
         # Show image
@@ -430,3 +507,4 @@ if __name__ == "__main__":
     main = ImageEditor()
     main.show()
     app.exec_()
+
