@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QLineEdit,  QVBoxLayout, QSlider, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
+from PyQt5.QtWidgets import QMessageBox, QDesktopWidget, QFileDialog, QLineEdit,  QVBoxLayout, QSlider, QHBoxLayout, QLabel, QWidget, QApplication, QPushButton
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from PyQt5.QtCore import Qt, QRect
@@ -11,7 +11,8 @@ class ImageEditor(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Image Editor")
-        self.setGeometry(100, 100, 800, 800)
+        # Size the screen
+        self.setGeometry(QDesktopWidget().screenGeometry())
 
         self.initUI()
 
@@ -111,6 +112,59 @@ class ImageEditor(QWidget):
         self.rotate_button.clicked.connect(self.rotate_image)
         self.rotate_button.setEnabled(False)
 
+        # Show All filters
+        self.other_filters = QPushButton("Filters")
+        self.other_filters.clicked.connect(self.open_filter_menu)
+        self.other_filters.setEnabled(False)
+
+        # Filters button
+        self.contour_button = QPushButton("Contour")
+        self.contour_button.setEnabled(False)
+        self.contour_button.setVisible(False)
+        self.contour_button.clicked.connect(self.contour_image)
+
+        self.detail_button = QPushButton("Detail")
+        self.detail_button.setEnabled(False)
+        self.detail_button.setVisible(False)
+        self.detail_button.clicked.connect(self.detail_image)
+
+        self.edge_enhance_button = QPushButton("Enhance edge")
+        self.edge_enhance_button.setEnabled(False)
+        self.edge_enhance_button.setVisible(False)
+        self.edge_enhance_button.clicked.connect(self.edge_enhance_image)
+
+        self.emboss_button = QPushButton("Emboss")
+        self.emboss_button.setEnabled(False)
+        self.emboss_button.setVisible(False)
+        self.emboss_button.clicked.connect(self.emboss_image)
+
+        self.find_edges_button = QPushButton("Find edges")
+        self.find_edges_button.setEnabled(False)
+        self.find_edges_button.setVisible(False)
+        self.find_edges_button.clicked.connect(self.find_edges_image)
+
+        self.sharpen_button = QPushButton("Sharpen")
+        self.sharpen_button.setEnabled(False)
+        self.sharpen_button.setVisible(False)
+        self.sharpen_button.clicked.connect(self.sharpen_image)
+
+        self.smooth_button = QPushButton("Smooth")
+        self.smooth_button.setEnabled(False)
+        self.smooth_button.setVisible(False)
+        self.smooth_button.clicked.connect(self.smooth_image)
+
+        self.smooth_more_button = QPushButton("Smooth more")
+        self.smooth_more_button.setEnabled(False)
+        self.smooth_more_button.setVisible(False)
+        self.smooth_more_button.clicked.connect(self.smooth_more_image)
+
+
+        # Back to main buttons menu
+        self.back_main_button = QPushButton("Back")
+        self.back_main_button.setEnabled(False)
+        self.back_main_button.setVisible(False)
+        self.back_main_button.clicked.connect(self.back_to_main_button_menu)
+
         # Change weight and height text
         self.weight_size_label = QLabel("Weight")
         self.weight_size_label.setVisible(False)
@@ -136,6 +190,7 @@ class ImageEditor(QWidget):
         self.next_image.setEnabled(False)
 
         # Put widgets into btn layout
+        # Main buttons
         self.btn_main_layout.addWidget(self.open_btn, alignment=Qt.AlignTop)
         self.btn_main_layout.addWidget(self.save_btn)
         self.btn_main_layout.addWidget(self.gray_change)
@@ -146,8 +201,24 @@ class ImageEditor(QWidget):
         self.btn_main_layout.addWidget(self.resize_button)
         self.btn_main_layout.addWidget(self.crop_button)
         self.btn_main_layout.addWidget(self.rotate_button)
+        self.btn_main_layout.addWidget(self.other_filters)
+        # Filters buttons
+        self.btn_main_layout.addWidget(self.contour_button)
+        self.btn_main_layout.addWidget(self.detail_button)
+        self.btn_main_layout.addWidget(self.edge_enhance_button)
+        self.btn_main_layout.addWidget(self.emboss_button)
+        self.btn_main_layout.addWidget(self.find_edges_button)
+        self.btn_main_layout.addWidget(self.sharpen_button)
+        self.btn_main_layout.addWidget(self.smooth_button)
+        self.btn_main_layout.addWidget(self.smooth_more_button)
+        self.btn_main_layout.addWidget(self.back_main_button)
+
+
+        # Next and prev for every button
         self.btn_main_layout.addWidget(self.previous_image)
         self.btn_main_layout.addWidget(self.next_image)
+
+
         self.btn_main_layout.setAlignment(Qt.AlignLeft)
         self.btn_main_layout.setSpacing(10)
 
@@ -199,6 +270,55 @@ class ImageEditor(QWidget):
             painter.setBrush(Qt.gray)
             painter.drawRect(self.selecting_area_crop)
 
+    def show_filter_buttons(self):
+        self.contour_button.setVisible(True)
+        self.detail_button.setVisible(True)
+        self.edge_enhance_button.setVisible(True)
+        self.emboss_button.setVisible(True)
+        self.find_edges_button.setVisible(True)
+        self.sharpen_button.setVisible(True)
+        self.smooth_button.setVisible(True)
+        self.smooth_more_button.setVisible(True)
+        self.back_main_button.setVisible(True)
+
+    def hide_filter_buttons(self):
+        self.contour_button.setVisible(False)
+        self.detail_button.setVisible(False)
+        self.edge_enhance_button.setVisible(False)
+        self.emboss_button.setVisible(False)
+        self.find_edges_button.setVisible(False)
+        self.sharpen_button.setVisible(False)
+        self.smooth_button.setVisible(False)
+        self.smooth_more_button.setVisible(False)
+        self.back_main_button.setVisible(False)
+
+    def show_main_buttons(self):
+        """Make main buttons visible"""
+        self.gray_change.setVisible(True)
+        self.blur_change.setVisible(True)
+        self.save_btn.setVisible(True)
+        self.resolution_btn.setVisible(True)
+        self.flip_h.setVisible(True)
+        self.flip_v.setVisible(True)
+        self.resize_button.setVisible(True)
+        self.crop_button.setVisible(True)
+        self.rotate_button.setVisible(True)
+        self.other_filters.setVisible(True)
+
+    def hide_main_buttons(self):
+        """Make main buttons hidden"""
+        self.gray_change.setVisible(False)
+        self.blur_change.setVisible(False)
+        self.save_btn.setVisible(False)
+        self.resolution_btn.setVisible(False)
+        self.flip_h.setVisible(False)
+        self.flip_v.setVisible(False)
+        self.resize_button.setVisible(False)
+        self.crop_button.setVisible(False)
+        self.rotate_button.setVisible(False)
+        self.other_filters.setVisible(False)
+
+
     def make_all_btns_true(self):
         # Makes all buttons editable true
         self.gray_change.setEnabled(True)
@@ -210,6 +330,17 @@ class ImageEditor(QWidget):
         self.resize_button.setEnabled(True)
         self.crop_button.setEnabled(True)
         self.rotate_button.setEnabled(True)
+        self.other_filters.setEnabled(True)
+        # Filters
+        self.contour_button.setEnabled(True)
+        self.detail_button.setEnabled(True)
+        self.edge_enhance_button.setEnabled(True)
+        self.emboss_button.setEnabled(True)
+        self.find_edges_button.setEnabled(True)
+        self.sharpen_button.setEnabled(True)
+        self.smooth_button.setEnabled(True)
+        self.smooth_more_button.setEnabled(True)
+        self.back_main_button.setEnabled(True)
 
     def make_all_btns_false(self):
         # Makes all buttons editable false
@@ -222,6 +353,17 @@ class ImageEditor(QWidget):
         self.resize_button.setEnabled(False)
         self.crop_button.setEnabled(False)
         self.rotate_button.setEnabled(False)
+        self.other_filters.setEnabled(False)
+        # Filters
+        self.contour_button.setEnabled(False)
+        self.detail_button.setEnabled(False)
+        self.edge_enhance_button.setEnabled(False)
+        self.emboss_button.setEnabled(False)
+        self.find_edges_button.setEnabled(False)
+        self.sharpen_button.setEnabled(False)
+        self.smooth_button.setEnabled(False)
+        self.smooth_more_button.setEnabled(False)
+        self.back_main_button.setEnabled(False)
 
     def make_resize_label_btn_visible(self):
         """Show the resize buttons and labels"""
@@ -306,6 +448,169 @@ class ImageEditor(QWidget):
         # save memory
         self.clear_images()
         print("Index", self.current_image_index)
+
+    def open_filter_menu(self):
+        """Go to filter menu"""
+        self.hide_main_buttons()
+        self.show_filter_buttons()
+
+    def back_to_main_button_menu(self):
+        self.show_main_buttons()
+        self.hide_filter_buttons()
+
+    def contour_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.CONTOUR)
+            new_filename = f"images/contour{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def detail_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.DETAIL)
+            new_filename = f"images/detail{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def edge_enhance_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.EDGE_ENHANCE)
+            new_filename = f"images/edge_enhance{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def emboss_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.EMBOSS)
+            new_filename = f"images/emboss{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+
+    def find_edges_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.FIND_EDGES)
+            new_filename = f"images/find_edges{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+
+    def sharpen_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.SHARPEN)
+            new_filename = f"images/sharpen{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def smooth_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.SMOOTH)
+            new_filename = f"images/smooth{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def smooth_more_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_contour = image.filter(ImageFilter.SMOOTH_MORE)
+            new_filename = f"images/smooth_more{self.file_extension}"
+            image_contour.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
 
     def rotate_image(self):
