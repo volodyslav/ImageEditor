@@ -43,14 +43,13 @@ class ImageEditor(QWidget):
         # connect open btn to opem_image fucntion
         self.open_btn.clicked.connect(self.open_image)
         self.open_btn.setObjectName("open_button")
-        self.open_btn.setStyleSheet(
+        self.setStyleSheet(
             "QPushButton {"
             "   background-color: #007bff;" 
             "   color: #ffffff;"  
             "   padding: 10px 20px;"  
             "   margin: 0;"  
-            "   border: 2px solid #007bff;" 
-            "   border-radius: 5px;" 
+            "   border: none;" 
             "   font-family: Arial;"          
             "   font-size: 20px;"            
             "   font-weight: bold;"           
@@ -58,6 +57,9 @@ class ImageEditor(QWidget):
             "QPushButton:hover {"
             "   background-color: #0056b3;"  
             "   border: 2px solid #0056b3;" 
+            "}"
+            "QPushButton:disabled {"
+            "   background-color: gray;"
             "}"
         )
 
@@ -104,6 +106,11 @@ class ImageEditor(QWidget):
         self.crop_button.clicked.connect(self.crop_image)
         self.crop_button.setEnabled(False)
 
+        # Rotate button
+        self.rotate_button = QPushButton("Rotate")
+        self.rotate_button.clicked.connect(self.rotate_image)
+        self.rotate_button.setEnabled(False)
+
         # Change weight and height text
         self.weight_size_label = QLabel("Weight")
         self.weight_size_label.setVisible(False)
@@ -138,9 +145,11 @@ class ImageEditor(QWidget):
         self.btn_main_layout.addWidget(self.flip_v)
         self.btn_main_layout.addWidget(self.resize_button)
         self.btn_main_layout.addWidget(self.crop_button)
+        self.btn_main_layout.addWidget(self.rotate_button)
         self.btn_main_layout.addWidget(self.previous_image)
         self.btn_main_layout.addWidget(self.next_image)
         self.btn_main_layout.setAlignment(Qt.AlignLeft)
+        self.btn_main_layout.setSpacing(10)
 
         # for resize button
         self.sliders_layout.addWidget(self.weight_size_label)
@@ -200,6 +209,7 @@ class ImageEditor(QWidget):
         self.flip_v.setEnabled(True)
         self.resize_button.setEnabled(True)
         self.crop_button.setEnabled(True)
+        self.rotate_button.setEnabled(True)
 
     def make_all_btns_false(self):
         # Makes all buttons editable false
@@ -211,6 +221,7 @@ class ImageEditor(QWidget):
         self.flip_v.setEnabled(False)
         self.resize_button.setEnabled(False)
         self.crop_button.setEnabled(False)
+        self.rotate_button.setEnabled(False)
 
     def make_resize_label_btn_visible(self):
         """Show the resize buttons and labels"""
@@ -296,6 +307,26 @@ class ImageEditor(QWidget):
         self.clear_images()
         print("Index", self.current_image_index)
 
+
+    def rotate_image(self):
+        try:
+            image = Image.open(self.images[self.current_image_index])
+            image_rotated = image.rotate(90, expand=True)
+            new_filename = f"images/rotate{self.file_extension}"
+            image_rotated.save(new_filename)
+            # Add into images list for return back
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
+            # Set current index = -1, the last editing
+            self.current_image_index = -1
+            # Show image
+            self.load_image(new_filename)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
     def crop_image(self):
         try:
             if self.selecting_area_crop:
@@ -354,7 +385,10 @@ class ImageEditor(QWidget):
         new_image.save(new_filename)
         # Add into images list for return back
         # Add during changes only one element resize
-        self.images[-1] = new_filename
+        if len(self.images) > 1:
+            self.images[-1] = new_filename
+        else:
+            self.images.append(new_filename)
         # Set current index = -1, the last editing
         self.current_image_index = -1
         # Show image
@@ -416,7 +450,11 @@ class ImageEditor(QWidget):
             # Save the image
             gray_image.save(new_filename)
             # Add into images list for return back
-            self.images.append(new_filename)
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -438,7 +476,11 @@ class ImageEditor(QWidget):
             # Save the image
             gray_image.save(new_filename)
             # Add into images list for return back
-            self.images.append(new_filename)
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -459,7 +501,11 @@ class ImageEditor(QWidget):
             # Save the image
             flip_image.save(new_filename)
             # Add into images list for return back
-            self.images.append(new_filename)
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -479,7 +525,11 @@ class ImageEditor(QWidget):
             # Save the image
             flip_image.save(new_filename)
             # Add into images list for return back
-            self.images.append(new_filename)
+            # Add during changes only one element resize
+            if len(self.images) > 1:
+                self.images[-1] = new_filename
+            else:
+                self.images.append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
