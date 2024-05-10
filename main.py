@@ -3,7 +3,7 @@ from PIL import Image, ImageFilter
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from PyQt5.QtCore import Qt, QRect
 import os
-import time
+import shutil
 
 
 class ImageEditor(QWidget):
@@ -270,6 +270,12 @@ class ImageEditor(QWidget):
             painter.setBrush(Qt.gray)
             painter.drawRect(self.selecting_area_crop)
 
+    def image_append(self, new_filename):
+        if new_filename in self.images:
+            pass
+        else:
+            self.images.append(new_filename)
+
     def show_filter_buttons(self):
         self.contour_button.setVisible(True)
         self.detail_button.setVisible(True)
@@ -393,7 +399,14 @@ class ImageEditor(QWidget):
                 # Save file like image
                 image = Image.open(filename)
                 # create folder images for saving them there
-                #os.mkdir("images")
+                folder_path = 'images'
+
+                if os.path.exists(folder_path):
+                    print("Folder exists.")
+                else:
+                    print("Folder does not exist.")
+                    os.mkdir("images")
+
                 # Find extensions, save extension for the image for all changes
                 self.file_extension = os.path.splitext(filename)[1]
                 # New name
@@ -466,10 +479,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -485,10 +495,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -504,10 +511,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -523,10 +527,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -543,10 +544,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -563,10 +561,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -582,10 +577,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -601,10 +593,7 @@ class ImageEditor(QWidget):
             image_contour.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -621,10 +610,7 @@ class ImageEditor(QWidget):
             image_rotated.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -637,15 +623,14 @@ class ImageEditor(QWidget):
             if self.selecting_area_crop:
                 image = Image.open(self.images[self.current_image_index])
                 # Click make others button disabled!!!!!!!!!!!!!!!!!
-                image_cropped = image.crop((self.start_pos.x()*2, self.start_pos.y()*2, self.end_pos.x()*2, self.end_pos.y()*2))
-                print((self.start_pos.x()//2, self.start_pos.y()//2, self.end_pos.x()//2, self.end_pos.y()//2))
+                image_cropped = image.crop((self.start_pos.x()//2, self.start_pos.y()//2, self.end_pos.x()//2, self.end_pos.y()//2))
 
                 new_filename = f"images/crop{self.file_extension}"
                 image_cropped.save(new_filename)
                 # Add into images list for return back
                 # Add during changes only one element resize
-                if len(self.images) > 1:
-                    self.images[-1] = new_filename
+                if new_filename in self.images:
+                    pass
                 else:
                     self.images.append(new_filename)
 
@@ -690,10 +675,7 @@ class ImageEditor(QWidget):
         new_image.save(new_filename)
         # Add into images list for return back
         # Add during changes only one element resize
-        if len(self.images) > 1:
-            self.images[-1] = new_filename
-        else:
-            self.images.append(new_filename)
+        self.image_append(new_filename)
         # Set current index = -1, the last editing
         self.current_image_index = -1
         # Show image
@@ -722,7 +704,7 @@ class ImageEditor(QWidget):
         try:
             image = Image.open(self.images[self.current_image_index])
             width, height = image.size
-            if width < 2000 and height < 2000:
+            if width < 3000 and height < 3000:
                 new_width = width * 2
                 new_height = height * 2
                 print(new_width, new_height)
@@ -756,10 +738,7 @@ class ImageEditor(QWidget):
             gray_image.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -782,16 +761,13 @@ class ImageEditor(QWidget):
             gray_image.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
             self.load_image(new_filename)
             # disable the button
-            self.blur_change.setEnabled(False)
+            #self.blur_change.setEnabled(False)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
@@ -807,10 +783,7 @@ class ImageEditor(QWidget):
             flip_image.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -831,10 +804,7 @@ class ImageEditor(QWidget):
             flip_image.save(new_filename)
             # Add into images list for return back
             # Add during changes only one element resize
-            if len(self.images) > 1:
-                self.images[-1] = new_filename
-            else:
-                self.images.append(new_filename)
+            self.image_append(new_filename)
             # Set current index = -1, the last editing
             self.current_image_index = -1
             # Show image
@@ -844,11 +814,20 @@ class ImageEditor(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
+    def delete_image_folder(self):
+        folder_path = "images"
+        # Delete the folder and its contents
+        try:
+            shutil.rmtree(folder_path)
+            print("Folder deleted successfully.")
+        except OSError as e:
+            print(f"Error: {folder_path} : {e.strerror}")
 
 
 if __name__ == "__main__":
     app = QApplication([])
     main = ImageEditor()
     main.show()
+    app.aboutToQuit.connect(main.delete_image_folder)
     app.exec_()
 
